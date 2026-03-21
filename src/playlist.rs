@@ -141,6 +141,71 @@ pub fn mahalanobis_distance(a: &Array1<f32>, b: &Array1<f32>, m: &Array2<f32>) -
     (a - b).dot(m).dot(&(a - b)).sqrt()
 }
 
+/// Given a set of seed feature vectors, compute a diagonal Mahalanobis weight
+/// matrix where dimensions with low variance (seeds agree) get high weight,
+/// and dimensions with high variance get low weight.
+///
+/// This is useful for dynamically adapting the distance metric to emphasize
+/// the characteristics that a set of seed songs have in common.
+///
+/// Returns `None` if fewer than 2 seeds are provided (variance is undefined
+/// for a single point).
+///
+/// # Arguments
+///
+/// * `seeds` - Feature vectors of the seed songs (each must have the same length).
+///
+/// # Example
+///
+/// ```
+/// use ndarray::{arr1, Array2};
+/// use bliss_audio::playlist::{variance_based_weight_matrix, mahalanobis_distance_builder};
+///
+/// let seed1 = arr1(&[0.3, 0.8, 0.5]);
+/// let seed2 = arr1(&[0.3, 0.2, 0.5]);
+/// // Dimension 0 and 2 are identical across seeds → high weight
+/// // Dimension 1 varies → low weight
+/// let m = variance_based_weight_matrix(&[seed1, seed2]).unwrap();
+/// assert!(m[[0, 0]] > m[[1, 1]]); // stable dimension weighted higher
+/// ```
+pub fn variance_based_weight_matrix(seeds: &[Array1<f32>]) -> Option<Array2<f32>> {
+    if seeds.len() < 2 {
+        return None;
+    }
+    let n = seeds[0].len();
+    let n_seeds = seeds.len() as f32;
+
+    // Compute mean per dimension
+    let mut mean = Array1::<f32>::zeros(n);
+    for seed in seeds {
+        mean = mean + seed;
+    }
+    mean /= n_seeds;
+
+    // Compute variance per dimension
+    let mut variance = Array1::<f32>::zeros(n);
+    for seed in seeds {
+        let diff = seed - &mean;
+        variance = variance + &diff * &diff;
+    }
+    variance /= n_seeds;
+
+    // Inverse variance weighting (epsilon prevents division by zero)
+    let epsilon = 1e-6;
+    let mut weights = variance.mapv(|v| 1.0 / (v + epsilon));
+
+    // Normalize so weights sum to n (preserve overall distance scale)
+    let sum: f32 = weights.sum();
+    weights *= n as f32 / sum;
+
+    // Build diagonal matrix
+    let mut m = Array2::<f32>::zeros((n, n));
+    for i in 0..n {
+        m[[i, i]] = weights[i];
+    }
+    Some(m)
+}
+
 fn feature_array1_to_array(f: &Array1<f32>) -> [f32; NUMBER_FEATURES] {
     f.as_slice()
         .expect("Couldn't convert feature vector to slice")
