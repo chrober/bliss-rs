@@ -21,9 +21,9 @@ use crate::misc::LoudnessDesc;
 use crate::temporal::BPMDesc;
 #[cfg(feature = "analysis")]
 use crate::timbral::{SpectralDesc, ZeroCrossingRateDesc};
-use crate::{BlissError, BlissResult, FeaturesVersion};
 #[cfg(feature = "analysis")]
 use crate::SAMPLE_RATE;
+use crate::{BlissError, BlissResult, FeaturesVersion};
 use core::ops::Index;
 use ndarray::{arr1, Array1};
 use std::fmt;

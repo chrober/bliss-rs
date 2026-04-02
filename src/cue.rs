@@ -16,12 +16,12 @@ use rcue::cue::{Cue, Track};
 #[cfg(feature = "analysis")]
 use rcue::parser::parse_from_file;
 #[cfg(feature = "analysis")]
+use std::marker::PhantomData;
+#[cfg(feature = "analysis")]
 use std::path::Path;
+use std::path::PathBuf;
 #[cfg(feature = "analysis")]
 use std::time::Duration;
-#[cfg(feature = "analysis")]
-use std::marker::PhantomData;
-use std::path::PathBuf;
 
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Default, Debug, PartialEq, Eq, Clone)]
