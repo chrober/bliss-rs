@@ -40,6 +40,7 @@ python-bindings = ["analysis", "bliss-audio-aubio-rs/fftw3"]
 # Enable the benchmarks with `cargo +nightly bench --features=bench`
 bench = ["analysis", "dep:criterion"]
 library = [
+    "analysis",
     "serde",
     "dep:rusqlite",
     "dep:dirs",
