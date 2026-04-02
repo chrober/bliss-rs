@@ -503,6 +503,7 @@ mod tests {
     #[cfg(feature = "ffmpeg")]
     use std::path::Path;
 
+    #[cfg(feature = "analysis")]
     #[test]
     fn test_analysis_too_small() {
         let error = Song::analyze(&[0.]).unwrap_err();
