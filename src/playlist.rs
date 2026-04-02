@@ -178,7 +178,7 @@ pub fn variance_based_weight_matrix(seeds: &[Array1<f32>]) -> Option<Array2<f32>
     // Compute mean per dimension
     let mut mean = Array1::<f32>::zeros(n);
     for seed in seeds {
-        mean = mean + seed;
+        mean += seed;
     }
     mean /= n_seeds;
 
